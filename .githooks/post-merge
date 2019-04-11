@@ -1,0 +1,54 @@
+#!/bin/sh
+
+updateTag () {
+    result=0
+    version=$(git describe --abbrev=0 --tags)
+    versionBits=(${version//./ })
+    if [ -z "${versionBits[0]}" ] ; then major=0 ; else major=${versionBits[0]} ; fi
+    if [ -z "${versionBits[1]}" ] ; then minor=0 ; else minor=${versionBits[1]} ; fi
+    if [ -z "${versionBits[2]}" ] ; then patch=0 ; else patch=${versionBits[2]} ; fi
+
+    case "$1" in
+        "1") major=$((major+1)) && minor=0 && patch=0 ;;
+        "2") minor=$((minor+1)) && patch=0 ;;
+        "3") patch=$((patch+1)) ;;
+    esac
+    newVersion=$major'.'$minor'.'$patch
+
+    read -r -p $'\n'"Set version (tag) to: $newVersion? [Y/n]" response
+    response=${response,,} # tolower
+    if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
+        git tag $newVersion
+        echo 'Success! New version: '$newVersion
+        result=1
+    fi
+}
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$branch" == "stable" ] ; then
+    echo $'\nWhat you want update? (current version: '$(git describe --abbrev=0 --tags)')'
+    exec < /dev/tty
+    PS3="Enter your choice (must be a number): "
+    select mode in Major Minor Patch Quit
+    do
+        case $mode in
+            "Major")
+                updateTag 1
+                if [ $result == 1 ] ; then break ; fi
+                ;;
+            "Minor")
+                updateTag 2
+                if [ $result == 1 ] ; then break ; fi
+                ;;
+            "Patch")
+                updateTag 3
+                if [ $result == 1 ] ; then break ; fi
+                ;;
+            *)
+                echo "Quit."
+                break
+                ;;
+        esac
+    done
+fi
