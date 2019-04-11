@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Config
+prodBranch='stable'
+
 updateTag () {
     result=0
     version=$(git describe --abbrev=0 --tags)
@@ -20,13 +23,20 @@ updateTag () {
     if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
         git tag $newVersion
         echo 'Success! New version: '$newVersion
+
+        read -r -p $'\n'"Push tags? [Y/n]" response
+        response=${response,,} # tolower
+        if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
+            git push --tags
+        fi
+
         result=1
     fi
 }
 
 branch=$(git rev-parse --abbrev-ref HEAD)
 
-if [ "$branch" == "stable" ] ; then
+if [ "$branch" == "$prodBranch" ] ; then
     echo $'\nWhat you want update? (current version: '$(git describe --abbrev=0 --tags)')'
     exec < /dev/tty
     PS3="Enter your choice (must be a number): "
