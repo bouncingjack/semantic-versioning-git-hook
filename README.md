@@ -2,7 +2,9 @@
 
 Hook for increase semantic version of release  (git tag) like [semver.org](https://semver.org/)
 
-Hook is trigger when you execute ``git merge`` on production branch (in this case ``stable``)
+Hook is trigger when you execute ``git merge`` on production branch (in this case ``stable``). You can also exec manually hook.
+
+When your branch is called differently than ``stable``. You can change config var named ``prodBranch`` in hook file.
 
 You can increase with hook:
 
