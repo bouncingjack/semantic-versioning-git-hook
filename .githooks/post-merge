@@ -20,6 +20,13 @@ updateTag () {
     if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
         git tag $newVersion
         echo 'Success! New version: '$newVersion
+
+        read -r -p $'\n'"Push tags? [Y/n]" response
+        response=${response,,} # tolower
+        if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
+            git push --tags
+        fi
+
         result=1
     fi
 }
